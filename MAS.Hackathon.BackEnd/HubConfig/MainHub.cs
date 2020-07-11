@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.SignalR;
 
 namespace MAS.Hackathon.BackEnd.HubConfig
 {
-    public class MainHub
+    public class MainHub : Hub
     {
     }
 }
