@@ -39,6 +39,7 @@ namespace MAS.Hackathon.BackEnd.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _httpClientFactory = httpFactory ?? throw new ArgumentNullException(nameof(httpFactory));
+            _messaging = messaging ?? throw new ArgumentNullException(nameof(messaging));
         }
 
         [HttpPost("start")]
