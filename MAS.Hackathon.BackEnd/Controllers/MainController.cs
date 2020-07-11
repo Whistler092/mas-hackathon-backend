@@ -76,18 +76,17 @@ namespace MAS.Hackathon.BackEnd.Controllers
                     return;
             
                 var contentRequest = new RequestPredictionModel{Url = urlImage};
-                //var contentRequest = new RequestPredictionModel{Url = "http://64.225.8.39/Client/Images/9578df4b-12a4-48a3-8cda-3c92100e65c6-20200711160755.jpg"};
-                //var predictionEndpointResult = await RunHttpStarterPredictionModel(contentRequest);
+                var predictionEndpointResult = await RunHttpStarterPredictionModel(contentRequest);
 
-                //if (predictionEndpointResult is null)
-                //    return;
+                if (predictionEndpointResult is null)
+                    return;
 
                 //Prediction Rules to classify the image and return it
                 var tagName = _configuration.GetValue<string>("PredictionConfiguration:TagName");
                 var probability = _configuration.GetValue<float>("PredictionConfiguration:Probability");
-                //var predictionResult = predictionEndpointResult.Predictions.Where(data => data.TagName == tagName && data.Probability >= probability);
+                var predictionResult = predictionEndpointResult.Predictions.Where(data => data.TagName == tagName && data.Probability >= probability);
 
-                //if (predictionResult.Any())
+                if (predictionResult.Any())
                     await _hub.Clients.All.SendAsync(_configuration.GetValue<string>("HubConfiguration:BroadcastDataMethod"), urlImage);
             }
             catch (Exception ex)
