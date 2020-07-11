@@ -1,3 +1,4 @@
+using MAS.Hackathon.BackEnd.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -26,10 +27,11 @@ namespace MAS.Hackathon.BackEnd
                     .AllowAnyHeader()
                     .AllowCredentials()
                 );
-
             });
 
             services.AddControllers();
+            services.AddOptions<PushNotificationConfig>().Bind(Configuration.GetSection(nameof(PushNotificationConfig)));
+            services.AddFirebaseCloudMessaging();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
