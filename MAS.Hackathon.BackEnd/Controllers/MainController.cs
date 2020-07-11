@@ -77,7 +77,7 @@ namespace MAS.Hackathon.BackEnd.Controllers
             
                 var contentRequest = new RequestPredictionModel{Url = urlImage};
                 //var contentRequest = new RequestPredictionModel{Url = "http://64.225.8.39/Client/Images/9578df4b-12a4-48a3-8cda-3c92100e65c6-20200711160755.jpg"};
-                var predictionEndpointResult = await RunHttpStarterPredictionModel(contentRequest);
+                //var predictionEndpointResult = await RunHttpStarterPredictionModel(contentRequest);
 
                 //if (predictionEndpointResult is null)
                 //    return;
