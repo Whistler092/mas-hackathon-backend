@@ -1,4 +1,5 @@
-﻿using MAS.Hackathon.BackEnd.Common;
+﻿using FirebaseAdmin.Messaging;
+using MAS.Hackathon.BackEnd.Common;
 using MAS.Hackathon.BackEnd.HubConfig;
 using MAS.Hackathon.BackEnd.Models;
 using Microsoft.AspNetCore.Hosting;
@@ -7,8 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -26,8 +29,9 @@ namespace MAS.Hackathon.BackEnd.Controllers
         private readonly ILogger<MainController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly FirebaseMessaging _messaging;
 
-        public MainController(IHubContext<MainHub> hub, IConfiguration configuration, IWebHostEnvironment webEnvironment, ILogger<MainController> logger, IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpFactory)
+        public MainController(IHubContext<MainHub> hub, IConfiguration configuration, IWebHostEnvironment webEnvironment, ILogger<MainController> logger, IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpFactory, FirebaseMessaging messaging)
         {
             _hub = hub ?? throw new ArgumentNullException(nameof(hub));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -55,7 +59,7 @@ namespace MAS.Hackathon.BackEnd.Controllers
 
                 urlImage = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host.Value}/{imagesFolder}/{fileName}";
 
-                return Ok(new {Message = $"Image Received {urlImage}"});
+                return Ok(new { Message = $"Image Received {urlImage}" });
             }
             catch (Exception ex)
             {
@@ -74,8 +78,8 @@ namespace MAS.Hackathon.BackEnd.Controllers
             {
                 if (string.IsNullOrWhiteSpace(urlImage))
                     return;
-            
-                var contentRequest = new RequestPredictionModel{Url = urlImage};
+
+                var contentRequest = new RequestPredictionModel { Url = urlImage };
                 var predictionEndpointResult = await RunHttpStarterPredictionModel(contentRequest);
 
                 if (predictionEndpointResult is null)
@@ -87,7 +91,27 @@ namespace MAS.Hackathon.BackEnd.Controllers
                 var predictionResult = predictionEndpointResult.Predictions.Where(data => data.TagName == tagName && data.Probability >= probability);
 
                 if (predictionResult.Any())
+                {
+                    var message = new Message()
+                    {
+                        Topic = _configuration.GetValue<string>("PushNotificationConfig:Topic"),
+                        Webpush = new WebpushConfig
+                        {
+                            //FcmOptions = new WebpushFcmOptions
+                            //{
+                            //    Link = "https://hackathon-gotzero.web.app/"
+                            //},
+                            Notification = new WebpushNotification
+                            {
+                                Title = "The Wall of Shame",
+                                Body = "¡A threat has been detected!",
+                                Image = urlImage
+                            }
+                        }
+                    };
                     await _hub.Clients.All.SendAsync(_configuration.GetValue<string>("HubConfiguration:BroadcastDataMethod"), urlImage);
+                    await _messaging.SendAsync(message);
+                }
             }
             catch (Exception ex)
             {
