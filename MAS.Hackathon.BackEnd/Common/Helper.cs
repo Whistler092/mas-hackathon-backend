@@ -1,10 +1,10 @@
-﻿using System;
+﻿using MAS.Hackathon.BackEnd.Models;
+using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 
 namespace MAS.Hackathon.BackEnd.Common
 {
@@ -27,7 +27,7 @@ namespace MAS.Hackathon.BackEnd.Common
             return fileName;
         }
 
-        public static async Task<string> CallEndpointPrediction(string content, string url, IHttpClientFactory httpClientFactory)
+        public static async Task<string> CallEndpointPrediction(RequestPredictionModel content, string url, IHttpClientFactory httpClientFactory)
         {
             var request = new HttpRequestMessage
             {

@@ -23,16 +23,16 @@ namespace MAS.Hackathon.BackEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddCors(options =>
-            //{
-            //    options.AddPolicy("CorsPolicy", builder => builder
-            //        .WithOrigins("")
-            //        .AllowAnyMethod()
-            //        .AllowAnyHeader()
-            //        .AllowCredentials()
-            //    );
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder => builder
+                    .WithOrigins(Configuration.GetValue<string>("FrontEndconfig:UrlBase"))
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                );
 
-            //});
+            });
 
             services.AddSignalR();
             services.AddControllers();
@@ -84,7 +84,7 @@ namespace MAS.Hackathon.BackEnd
 
             app.UseRouting();
 
-            //app.UseCors("CorsPolicy");
+            app.UseCors("CorsPolicy");
 
             app.UseAuthorization();
 

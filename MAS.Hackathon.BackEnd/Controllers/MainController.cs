@@ -37,9 +37,9 @@ namespace MAS.Hackathon.BackEnd.Controllers
         }
 
         [HttpPost("start")]
-        public async Task<ActionResult> Start([FromBody] string requestBase64Image)
+        public async Task<ActionResult> Start([FromBody] ReceiveStarModel requestBase64Image)
         {
-            if (string.IsNullOrWhiteSpace(requestBase64Image))
+            if (string.IsNullOrWhiteSpace(requestBase64Image.Image))
                 return BadRequest();
 
             string urlImage = string.Empty;
@@ -50,7 +50,7 @@ namespace MAS.Hackathon.BackEnd.Controllers
                 var imagesPath = Path.Combine(_webEnvironment.WebRootPath, imagesFolder);
                 var imagesExtension = _configuration.GetValue<string>("ImagesConfiguration:ImageExtension");
 
-                var fileName = await Helper.SaveImage(requestBase64Image, imagesPath, imagesExtension);
+                var fileName = await Helper.SaveImage(requestBase64Image.Image, imagesPath, imagesExtension);
 
                 urlImage = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host.Value}/{imagesFolder}/{fileName}";
 
@@ -63,24 +63,26 @@ namespace MAS.Hackathon.BackEnd.Controllers
             }
             finally
             {
-                //if (!string.IsNullOrWhiteSpace(urlImage))
-                if (string.IsNullOrWhiteSpace(urlImage))
-                    await RunHttpStarterPredictionModel(urlImage);
-
                 ReturnImage(urlImage);
             }
         }
 
         private async void ReturnImage(string urlImage)
         {
-            await _hub.Clients.All.SendAsync("BroadcastData", urlImage);
+            if (string.IsNullOrWhiteSpace(urlImage))
+                return;
+            
+            var contentRequest = new RequestPredictionModel{Url = urlImage};
+            var predictionModel = RunHttpStarterPredictionModel(contentRequest);
+
+            await _hub.Clients.All.SendAsync(_configuration.GetValue<string>("HubConfiguration:BroadcastDataMethod"), urlImage);
         }
 
-        private async Task<MainModel> RunHttpStarterPredictionModel(string urlImage)
+        private async Task<MainModel> RunHttpStarterPredictionModel(RequestPredictionModel contentRequest)
         {
             var requestUrl = $"{_configuration.GetValue<string>("PredictionConfiguration:UrlBase")}";
             _logger.LogInformation($"Main Process Request URL: {requestUrl}");
-            var content = await Helper.CallEndpointPrediction(urlImage, requestUrl, _httpClientFactory);
+            var content = await Helper.CallEndpointPrediction(contentRequest, requestUrl, _httpClientFactory);
             _logger.LogInformation($"RatingBatchService Response content: {content}");
             return string.IsNullOrWhiteSpace(content) ? null : JsonConvert.DeserializeObject<MainModel>(content);
         }
