@@ -27,13 +27,15 @@ namespace MAS.Hackathon.BackEnd.Common
             return fileName;
         }
 
-        public static async Task<string> CallEndpointPrediction(RequestPredictionModel content, string url, IHttpClientFactory httpClientFactory)
+        public static async Task<string> CallEndpointPrediction(RequestPredictionModel contentRequest, string url,
+            IHttpClientFactory httpClientFactory)
         {
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri(url),
-                Content = new StringContent(JsonConvert.SerializeObject(content), Encoding.UTF8, "application/json"),
+                Content = new StringContent(JsonConvert.SerializeObject(contentRequest), Encoding.UTF8,
+                    "application/json"),
                 Headers =
                 {
                     {"Accept", "*/*"}

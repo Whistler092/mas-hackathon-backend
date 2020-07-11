@@ -4,7 +4,7 @@ namespace MAS.Hackathon.BackEnd.Models
 {
     public class PredictionsModel
     {
-        public List<BoundingBoxModel> BoundingBox { get; set; }
+        public BoundingBoxModel BoundingBox { get; set; }
         public float Probability { get; set; }
         public int TagId { get; set; }
         public string TagName { get; set; }
